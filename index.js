@@ -5,6 +5,7 @@ import { exec } from 'child_process';
 import chalk from 'chalk';
 import playSound from 'play-sound';
 import open from 'open'
+import { dir } from 'console';
 
 // CONSTANTS
 // Directories are in here
@@ -57,6 +58,26 @@ async function listFolders(dirPath) {
 // Open a new terminal and ask for an input
 
 async function openNewTerminal(scriptPath) {
+    const command = process.platform === 'win32'
+    ? `start cmd /k node "${scriptPath}" "${directoryPath}"`
+    : `gnome-terminal -- node "${scriptPath}" "${directoryPath}"`;
+
+    exec(command, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`Error opening a new terminal: ${error}`);
+            return;
+        }
+        console.log(`Output: ${stdout}`);
+        console.error(`Error: ${stderr}`);
+    });
+}
+
+
+
+async function main() {
+
+    // STEP 1: ASKING USER WITH PROMPT
+
     // First get every folder from the Video Folder
     const folderOptions = listFolders(videoPath);
 
@@ -66,17 +87,32 @@ async function openNewTerminal(scriptPath) {
         process.exit(1);
     }
 
+    // Create prompt
+    inquirer.prompt([
+        {
+            type: 'list',
+            name: 'selectedFolder',
+            message: chalk.blue.bold('Select a folder to use:'),
+            choices: folderOptions,
+        },
+    ]) // Once this is complete, create a new terminal
+    .then(answers => {
+        const selectedFolder = answers.selectedFolder; 
+
+        // Make sure there are mp3 and mp4 files inside of this folder
+        
+
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        process.exit(1);
+    });
+
+
+
 
     // Once the terminal is open, create a prompt and send it in that terminal
     
-}
-
-
-
-async function main() {
-
-    // Use precompiled list to ask the user which 
-
 
 }
 
